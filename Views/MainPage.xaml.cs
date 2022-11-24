@@ -1,12 +1,15 @@
-﻿using Microsoft.UI.Xaml;
+﻿#pragma warning disable IDE0007
+
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using SimpleBackup.ViewModels;
+using SimpleBackup.Models;
 
 using Ookii.Dialogs.Wpf;
 using SimpleBackup.Helpers;
-using SimpleBackup.Services;
 using SimpleBackup.Contracts.Services;
+using Windows.Foundation;
 
 namespace SimpleBackup.Views;
 
@@ -34,7 +37,7 @@ public sealed partial class MainPage : Page
             
             foreach (var i in addedDirectories)
             {
-                DirListView.Items.Add(i);
+                DirListView.Items.Add(new DirectoryEntry(i));
             }
 
             NoDirectoriesWarning.IsOpen = DirListView.Items.Count == 0;
@@ -44,13 +47,13 @@ public sealed partial class MainPage : Page
 
         DirListView.SelectionChanged += (object sender, SelectionChangedEventArgs args) => RemoveButton.IsEnabled = args.AddedItems.Count > 0;
 
-        AddButton.Click += async (object sender, RoutedEventArgs args) =>
+        AddButton.Click += (object sender, RoutedEventArgs args) =>
         {
             VistaFolderBrowserDialog dialog = new VistaFolderBrowserDialog() { RootFolder = Environment.SpecialFolder.UserProfile };
 
-            if ((bool) dialog.ShowDialog() && !DirListView.Items.Contains(dialog.SelectedPath))
+            if ((bool) dialog.ShowDialog()! && !DirListView.Items.Contains(dialog.SelectedPath))
             {
-                DirListView.Items.Add(dialog.SelectedPath);
+                DirListView.Items.Add(new DirectoryEntry(dialog.SelectedPath));
                 NoDirectoriesWarning.IsOpen = false;
 
                 SaveDirectories(DirListView.Items);
@@ -72,17 +75,14 @@ public sealed partial class MainPage : Page
                 Content = (multiSelect ? "Main_DialogContent_RemoveMultipleDirectories" : "Main_DialogContent_RemoveSingleDirectory").GetLocalized()
             };
 
-            var result = await dialog.ShowAsync();
-
-
-            if (result == ContentDialogResult.Primary)
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 for (int i = DirListView.SelectedItems.Count - 1; i >= 0; i--)
                 {
                     DirListView.Items.Remove(DirListView.SelectedItems[i]);
                 }
 
-                if (DirListView.SelectedItems.Count == 0)
+                if (DirListView.Items.Count == 0)
                 {
                     NoDirectoriesWarning.IsOpen = true;
                 }

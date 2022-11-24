@@ -188,4 +188,7 @@
   <data name="Main_TargetDirectories_Header.Text" xml:space="preserve">
     <value>Target Directories</value>
   </data>
+  <data name="Main_DirectoryItem_SubtextNoParent" xml:space="preserve">
+    <value>Root directory</value>
+  </data>
 </root>
